@@ -298,10 +298,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         const extraAbsences = absentCount - oneThirdThreshold;
                         summaryText = `已超過總節數的1/3，並已額外缺席 ${extraAbsences} 節課。`;
                     }
-                } else if (sessionsThisCoursePerWeek > 0 && sessionsToReachThreshold > 0 && sessionsToReachThreshold <= sessionsThisCoursePerWeek) {
+                } else if (sessionsThisCoursePerWeek > 0 && sessionsToReachThreshold > 0 && sessionsToReachThreshold <= (sessionsThisCoursePerWeek * 2)) {
                     statusText = "警告";
                     statusClass = "warning";
-                    summaryText = `注意！若本科目再缺席 ${sessionsThisCoursePerWeek} 節，將會達到或超過1/3的缺席上限。`;
+                    summaryText = `注意！若本科目再缺席 ${sessionsToReachThreshold} 節，將會達到或超過1/3的缺席上限。`;
                 } else {
                     statusText = "安全";
                     statusClass = "safe";
