@@ -153,6 +153,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalSessionsByCourse = calculateTotalCourseSessions(currentTimetable, totalWeeks);
         
+        // Calculate weekly sessions for each course from the current timetable
+        const weeklySessionsByCourse = {};
+        Object.keys(currentTimetable).forEach(day => {
+            Object.values(currentTimetable[day]).forEach(courseName => {
+                if (courseName && courseName.trim() !== "") {
+                    weeklySessionsByCourse[courseName] = (weeklySessionsByCourse[courseName] || 0) + 1;
+                }
+            });
+        });
+
         const absenceCountsByCourse = {};
         const coursesWithAbsences = new Set();
 
@@ -198,30 +208,51 @@ document.addEventListener('DOMContentLoaded', () => {
             let statusText = "";
             let statusClass = ""; // For styling the badge and card
             let summaryText = "";
+            
+            const sessionsThisCoursePerWeek = weeklySessionsByCourse[courseName] || 0;
 
-            if (totalSessions > 0) {
+            if (totalSessions <= 0 && absentCount > 0) { 
+                statusText = "錯誤";
+                statusClass = "error"; 
+                summaryText = "課程總節數為0或未在課表，但有缺曠紀錄。";
+                sessionsToReachThreshold = -absentCount; 
+                oneThirdThreshold = 0; 
+            } else if (totalSessions > 0) {
                 oneThirdThreshold = Math.ceil(totalSessions / 3);
                 sessionsToReachThreshold = oneThirdThreshold - absentCount;
                 const isOverOrAtOneThird = absentCount >= oneThirdThreshold;
                 
                 if (isOverOrAtOneThird) {
-                    statusText = "超標";
+                    statusText = "已超過";
                     statusClass = "exceeded";
-                    summaryText = `已超過 1/3 上限。 ${absentCount - oneThirdThreshold +1} 次缺席。`;
-                     if (absentCount === oneThirdThreshold) {
+                    if (absentCount === oneThirdThreshold) {
                         summaryText = `已達 1/3 上限。`;
+                    } else {
+                        summaryText = `已超過 1/3 上限 ${absentCount - oneThirdThreshold} 次缺席。`; 
+                        // User had +1 here, let's verify. If threshold is 10, absent 11, 11-10=1. "已超過1次" seems correct.
+                        // Original user code in a previous turn: summaryText = `已超過 1/3 上限 ${absentCount - oneThirdThreshold +1} 次缺席。`;
+                        // Let's use the user's latest accepted version:
+                        // From user change: summaryText = `已超過 1/3 上限。 ${absentCount - oneThirdThreshold +1} 次缺席。`;
+                        // The logic `absentCount - oneThirdThreshold` seems more direct for "times over".
+                        // If threshold = 10, absent = 11, then 11-10 = 1. "Exceeded by 1".
+                        // If `absentCount - oneThirdThreshold + 1` means `(11-10)+1 = 2`. This seems like "2nd session into exceeded state"
+                        // Let's stick to the user's latest summaryText from the diff:
+                        summaryText = `已超過 1/3 上限。超過 ${absentCount - oneThirdThreshold + 1} 次缺席。`;
+                         if (absentCount === oneThirdThreshold) { // This condition will be met by the parent if, so it might make the above complex.
+                             summaryText = `已達 1/3 上限。`;
+                         }
+
+
                     }
+                } else if (sessionsThisCoursePerWeek > 0 && sessionsToReachThreshold > 0 && sessionsToReachThreshold <= sessionsThisCoursePerWeek) {
+                    statusText = "警告";
+                    statusClass = "warning";
+                    summaryText = `注意！若本科目再缺席 ${sessionsThisCoursePerWeek} 節，將會達到或超過1/3的缺席上限。`;
                 } else {
                     statusText = "安全";
                     statusClass = "safe";
                     summaryText = `在達到 1/3 上限之前，您還可以缺席 ${sessionsToReachThreshold} 次。`;
                 }
-            } else if (absentCount > 0) { 
-                statusText = "錯誤";
-                statusClass = "error"; // Or use 'exceeded' for similar visual
-                summaryText = "課程總節數為0或未在課表，但有缺曠紀錄。";
-                sessionsToReachThreshold = -absentCount; // to show negative
-                oneThirdThreshold = 0; // Explicitly set for display
             } else {
                 return; 
             }

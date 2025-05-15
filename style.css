@@ -153,8 +153,13 @@ button#calculateButton:hover {
 .result-card .status-badge.exceeded {
     background-color: #dc3545; /* Red for exceeded */
 }
+
+.result-card .status-badge.warning { /* New style for warning */
+    background-color: #ffc107; /* Yellow for warning */
+}
+
 .result-card .status-badge.error {
-    background-color: #ffc107; /* Yellow for error/warning */
+    background-color: #fd7e14; /* Orange for error (changed from yellow) */
 }
 
 .result-card .summary-text {
