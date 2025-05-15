@@ -137,7 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const totalWeeks = parseInt(totalWeeksInputEl.value);
+        const currentTimetable = getCurrentTimetable();
+        const parsedRecords = parseAbsenceRecords(absenceText);
+        const totalWeeks = parseInt(totalWeeksInputEl.value, 10);
+
         if (isNaN(totalWeeks) || totalWeeks <= 0) {
             alert("請輸入有效的學期總週數！");
             return;
@@ -146,8 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
             displayTotalWeeksEl.textContent = totalWeeks;
         }
 
-        const currentTimetable = getCurrentTimetable();
-        const parsedRecords = parseAbsenceRecords(absenceText);
         const totalSessionsByCourse = calculateTotalCourseSessions(currentTimetable, totalWeeks);
         
         const absenceCountsByCourse = {};
@@ -229,4 +230,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     populateTimetableEditor(initialTimetable);
+
+    if (totalWeeksInputEl && displayTotalWeeksEl) {
+        totalWeeksInputEl.addEventListener('input', () => {
+            const newTotalWeeks = parseInt(totalWeeksInputEl.value, 10);
+            if (!isNaN(newTotalWeeks) && newTotalWeeks > 0) {
+                displayTotalWeeksEl.textContent = newTotalWeeks;
+            } else {
+                displayTotalWeeksEl.textContent = "-"; // 或者一個預設的無效提示
+            }
+        });
+    }
 }); 
