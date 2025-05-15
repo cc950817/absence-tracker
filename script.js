@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function populateTimetableEditor(timetable) {
         timetableEditorEl.innerHTML = '';
-        const days = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"];
+        const days = ["星期一", "星期二", "星期三", "星期四", "星期五"];
         days.forEach(day => {
             const currentDaySchedule = timetable[day] || {};
             const dayDiv = document.createElement('div');
