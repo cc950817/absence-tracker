@@ -146,19 +146,19 @@ button#calculateButton:hover {
     white-space: nowrap;    /* Added to keep text horizontal */
 }
 
-.result-card .status-badge.safe {
+.status-badge.safe { /* Simplified selector */
     background-color: #28a745 !important; /* Green for safe */
 }
 
-.result-card .status-badge.exceeded {
+.status-badge.exceeded { /* Simplified selector */
     background-color: #dc3545 !important; /* Red for exceeded */
 }
 
-.result-card .status-badge.warning { /* New style for warning */
+.status-badge.warning { /* Simplified selector */
     background-color: #ffc107 !important; /* Yellow for warning */
 }
 
-.result-card .status-badge.error {
+.status-badge.error { /* Simplified selector */
     background-color: #fd7e14 !important; /* Orange for error (changed from yellow) */
 }
 

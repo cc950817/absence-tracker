@@ -264,11 +264,26 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sessionsToReachThreshold < 0) remainingAbsencesClass = 'negative';
             else if (sessionsToReachThreshold > 0 && statusClass === 'safe') remainingAbsencesClass = 'positive';
 
+            let badgeBackgroundColor = '';
+            switch (statusClass) {
+                case 'safe':
+                    badgeBackgroundColor = '#28a745'; // Green
+                    break;
+                case 'exceeded':
+                    badgeBackgroundColor = '#dc3545'; // Red
+                    break;
+                case 'warning':
+                    badgeBackgroundColor = '#ffc107'; // Yellow
+                    break;
+                case 'error':
+                    badgeBackgroundColor = '#fd7e14'; // Orange
+                    break;
+            }
 
             card.innerHTML = `
                 <div class="card-header">
                     <h3 class="course-name">${courseName}</h3>
-                    <span class="status-badge ${statusClass}">${statusText}</span>
+                    <span class="status-badge ${statusClass}" style="background-color: ${badgeBackgroundColor} !important;">${statusText}</span>
                 </div>
                 <p class="summary-text">${summaryText}</p>
                 <div class="details">
