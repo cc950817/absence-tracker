@@ -147,19 +147,19 @@ button#calculateButton:hover {
 }
 
 .result-card .status-badge.safe {
-    background-color: #28a745; /* Green for safe */
+    background-color: #28a745 !important; /* Green for safe */
 }
 
 .result-card .status-badge.exceeded {
-    background-color: #dc3545; /* Red for exceeded */
+    background-color: #dc3545 !important; /* Red for exceeded */
 }
 
 .result-card .status-badge.warning { /* New style for warning */
-    background-color: #ffc107; /* Yellow for warning */
+    background-color: #ffc107 !important; /* Yellow for warning */
 }
 
 .result-card .status-badge.error {
-    background-color: #fd7e14; /* Orange for error (changed from yellow) */
+    background-color: #fd7e14 !important; /* Orange for error (changed from yellow) */
 }
 
 .result-card .summary-text {
