@@ -29,8 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsEl = document.getElementById('results');
     const resultsTableBodyEl = document.querySelector('#resultsTable tbody');
     const timetableEditorEl = document.getElementById('timetableEditor');
+    const totalWeeksInputEl = document.getElementById('totalWeeks');
+    const displayTotalWeeksEl = document.getElementById('displayTotalWeeks');
 
-    const TOTAL_WEEKS = 17;
     const VALID_ABSENCE_TYPES = ["事", "曠"];
     const PERIODS_PER_DAY = 7;
 
@@ -136,9 +137,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const totalWeeks = parseInt(totalWeeksInputEl.value);
+        if (isNaN(totalWeeks) || totalWeeks <= 0) {
+            alert("請輸入有效的學期總週數！");
+            return;
+        }
+        if (displayTotalWeeksEl) {
+            displayTotalWeeksEl.textContent = totalWeeks;
+        }
+
         const currentTimetable = getCurrentTimetable();
         const parsedRecords = parseAbsenceRecords(absenceText);
-        const totalSessionsByCourse = calculateTotalCourseSessions(currentTimetable, TOTAL_WEEKS);
+        const totalSessionsByCourse = calculateTotalCourseSessions(currentTimetable, totalWeeks);
         
         const absenceCountsByCourse = {};
         const coursesWithAbsences = new Set();
