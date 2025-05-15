@@ -1,72 +1,127 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // 舊的 initialTimetable 可以保留，或者如果 Markdown 是唯一來源，則不需要了。
+    // 為清晰起見，暫時註解掉，如果後續解析邏輯需要一個空的初始結構，可以再啟用。
+    /*
     const initialTimetable = {
-        "星期一": {
-            1: "英文文法與閱讀", 2: "物聯網實習/機器人控制實習", 3: "物聯網實習/機器人控制實習",
-            4: "物聯網實習/機器人控制實習", 5: "國語文", 6: "體育", 7: "英語文"
-        },
-        "星期二": {
-            1: "初階微積分", 2: "專題實作", 3: "專題實作", 4: "專題實作",
-            5: "電腦網路實習/運算思維實習", 6: "電腦網路實習/運算思維實習", 7: "電腦網路實習/運算思維實習"
-        },
-        "星期三": {
-            1: "微處理機進階", 2: "初階微積分", 3: "動態網頁製作實習/物聯網基礎應用實習",
-            4: "動態網頁製作實習/物聯網基礎應用實習", 5: "綜合活動", 6: "綜合活動", 7: "班會"
-        },
-        "星期四": {
-            1: "國語文", 2: "電子電路", 3: "電子電路", 4: "初階微積分",
-            5: "藝術生活", 6: "英語文", 7: "體育"
-        },
-        "星期五": {
-            1: "微處理機進階", 2: "網路資料庫實習/智慧監控實習", 3: "網路資料庫實習/智慧監控實習",
-            4: "網路資料庫實習/智慧監控實習", 5: "國語文法概論", 6: "生涯規劃", 7: "英文文法與閱讀"
-        },
-        "星期六": {1:"", 2:"", 3:"", 4:"", 5:"", 6:"", 7:""},
-        "星期日": {1:"", 2:"", 3:"", 4:"", 5:"", 6:"", 7:""}
+        "星期一": {}, "星期二": {}, "星期三": {}, "星期四": {}, "星期五": {},
+        "星期六": {}, "星期日": {} // 包含週末以匹配舊結構，但通常不使用
     };
+    */
+
+    const defaultMarkdownTimetable = `### **星期一**
+
+- 第1節：英文文法與閱讀
+- 第2節：物聯網實習/機器人控制實習
+- 第3節：物聯網實習/機器人控制實習
+- 第4節：物聯網實習/機器人控制實習
+- 第5節：國語文
+- 第6節：體育
+- 第7節：英語文
+
+### **星期二**
+
+- 第1節：初階微積分
+- 第2節：專題實作
+- 第3節：專題實作
+- 第4節：專題實作
+- 第5節：電腦網路實習/運算思維實習
+- 第6節：電腦網路實習/運算思維實習
+- 第7節：電腦網路實習/運算思維實習
+
+### **星期三**
+
+- 第1節：微處理機進階
+- 第2節：初階微積分
+- 第3節：動態網頁製作實習/物聯網基礎應用實習
+- 第4節：動態網頁製作實習/物聯網基礎應用實習
+- 第5節：綜合活動
+- 第6節：綜合活動
+- 第7節：班會
+
+### **星期四**
+
+- 第1節：國語文
+- 第2節：電子電路
+- 第3節：電子電路
+- 第4節：初階微積分
+- 第5節：藝術生活
+- 第6節：英語文
+- 第7節：體育
+
+### **星期五**
+
+- 第1節：微處理機進階
+- 第2節：網路資料庫實習/智慧監控實習
+- 第3節：網路資料庫實習/智慧監控實習
+- 第4節：網路資料庫實習/智慧監控實習
+- 第5節：國語文法概論
+- 第6節：生涯規劃
+- 第7節：英文文法與閱讀`;
 
     const absenceDataEl = document.getElementById('absenceData');
     const calculateButtonEl = document.getElementById('calculateButton');
     const resultsEl = document.getElementById('results');
     const resultsCardsContainerEl = document.getElementById('resultsCardsContainer');
-    const timetableEditorEl = document.getElementById('timetableEditor');
+    
+    // 新的元素參照
+    const markdownTimetableEl = document.getElementById('markdownTimetable');
+    const clearTimetableButtonEl = document.getElementById('clearTimetableButton');
+
     const totalWeeksInputEl = document.getElementById('totalWeeks');
-    const displayTotalWeeksEl = document.getElementById('displayTotalWeeks');
+    // const displayTotalWeeksEl = document.getElementById('displayTotalWeeks'); // This was in index.html's table header, which is removed.
 
     const VALID_ABSENCE_TYPES = ["事", "曠"];
-    const PERIODS_PER_DAY = 7;
+    const PERIODS_PER_DAY = 7; // 雖然 Markdown 更靈活，但保留此常數可能對解析或驗證有用
 
-    function populateTimetableEditor(timetable) {
-        timetableEditorEl.innerHTML = '';
-        const days = ["星期一", "星期二", "星期三", "星期四", "星期五"];
-        days.forEach(day => {
-            const currentDaySchedule = timetable[day] || {};
-            const dayDiv = document.createElement('div');
-            dayDiv.classList.add('day-column');
-            dayDiv.innerHTML = `<h3>${day}</h3>`;
-            for (let i = 1; i <= PERIODS_PER_DAY; i++) {
-                const inputId = `tt-${day}-${i}`;
-                const courseName = currentDaySchedule[i] || "";
-                dayDiv.innerHTML += `
-                    <label for="${inputId}">第 ${i} 節:</label>
-                    <input type="text" id="${inputId}" data-day="${day}" data-period="${i}" value="${courseName}">
-                `;
-            }
-            timetableEditorEl.appendChild(dayDiv);
+    // 設定預設 Markdown 課表
+    if (markdownTimetableEl) {
+        markdownTimetableEl.value = defaultMarkdownTimetable;
+    }
+
+    // 清除課表按鈕事件
+    if (clearTimetableButtonEl && markdownTimetableEl) {
+        clearTimetableButtonEl.addEventListener('click', () => {
+            markdownTimetableEl.value = '';
         });
     }
 
-    function getCurrentTimetable() {
-        const currentTimetable = {};
-        const inputs = timetableEditorEl.querySelectorAll('input[type="text"]');
-        inputs.forEach(input => {
-            const day = input.dataset.day;
-            const period = parseInt(input.dataset.period);
-            if (!currentTimetable[day]) {
-                currentTimetable[day] = {};
+    function parseMarkdownTimetable(markdownText) {
+        const timetable = {
+            "星期一": {}, "星期二": {}, "星期三": {}, "星期四": {}, "星期五": {}
+            // 不包含週末，因為通常課表只到週五
+        };
+        if (!markdownText || typeof markdownText !== 'string') {
+            return timetable; // 返回空課表結構
+        }
+
+        const lines = markdownText.split('\n');
+        let currentDay = null;
+        const dayRegex = /^### \*\*(星期[一二三四五])\*\*/;
+        const courseRegex = /^- 第(\d)節：(.+)/;
+
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            const dayMatch = trimmedLine.match(dayRegex);
+            if (dayMatch) {
+                currentDay = dayMatch[1];
+                if (!timetable[currentDay]) { // 以防萬一 Markdown 寫錯星期
+                    timetable[currentDay] = {};
+                }
+                continue;
             }
-            currentTimetable[day][period] = input.value.trim();
-        });
-        return currentTimetable;
+
+            if (currentDay) {
+                const courseMatch = trimmedLine.match(courseRegex);
+                if (courseMatch) {
+                    const period = parseInt(courseMatch[1], 10);
+                    const courseName = courseMatch[2].trim();
+                    if (period >= 1 && period <= PERIODS_PER_DAY) { // 假設每日最多7節
+                        timetable[currentDay][period] = courseName;
+                    }
+                }
+            }
+        }
+        return timetable;
     }
 
     function rocToGregorianDate(rocDateStr) {
@@ -102,12 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dateObj = rocToGregorianDate(dateStr);
                 if (dateObj) {
                     const dailyAbsences = [];
-                    for (let i = 0; i < 9; i++) {
+                    // 假設銷假紀錄中最多有9節課的記錄 (parts[6] 到 parts[14])
+                    // 但我們的課表通常是7節，這裡取用課表定義的 PERIODS_PER_DAY
+                    for (let i = 0; i < PERIODS_PER_DAY; i++) { // 修改此處，原為9
                         dailyAbsences.push(parts[6 + i] ? parts[6 + i].trim() : "");
                     }
                     records.push({
                         date: dateObj,
-                        absences: dailyAbsences
+                        absences: dailyAbsences // 這應該是每日的缺曠狀態陣列，例如 ["", "事", "", "曠", ...]
                     });
                 }
             }
@@ -136,8 +193,26 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("請貼上缺曠資料！");
             return;
         }
+        
+        const markdownTimetableText = markdownTimetableEl.value;
+        if (!markdownTimetableText.trim()) {
+            alert("請輸入課表內容！");
+            return;
+        }
+        const currentTimetable = parseMarkdownTimetable(markdownTimetableText);
 
-        const currentTimetable = getCurrentTimetable();
+        // 檢查解析後的課表是否為空或無效
+        let hasValidCoursesInTimetable = false;
+        Object.values(currentTimetable).forEach(daySchedule => {
+            if (Object.keys(daySchedule).length > 0) {
+                hasValidCoursesInTimetable = true;
+            }
+        });
+        if (!hasValidCoursesInTimetable) {
+            alert("課表格式有誤或未包含任何課程，請依照範例格式輸入。");
+            return;
+        }
+
         const parsedRecords = parseAbsenceRecords(absenceText);
         const totalWeeks = parseInt(totalWeeksInputEl.value, 10);
 
@@ -145,16 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("請輸入有效的學期總週數！");
             return;
         }
-        if (displayTotalWeeksEl) {
-            // This element is gone from index.html, but we might re-add it or similar later.
-            // For now, let's check if it exists before trying to set its textContent.
-             // displayTotalWeeksEl.textContent = totalWeeks;
-        }
-
+        
         const totalSessionsByCourse = calculateTotalCourseSessions(currentTimetable, totalWeeks);
         
-        // Calculate weekly sessions for each course from the current timetable
-        const weeklySessionsByCourse = {};
+        const weeklySessionsByCourse = {}; // 重新從 currentTimetable 計算
         Object.keys(currentTimetable).forEach(day => {
             Object.values(currentTimetable[day]).forEach(courseName => {
                 if (courseName && courseName.trim() !== "") {
@@ -169,9 +238,9 @@ document.addEventListener('DOMContentLoaded', () => {
         parsedRecords.forEach(record => {
             const dayOfWeek = getDayOfWeekChinese(record.date);
             if (dayOfWeek && currentTimetable[dayOfWeek]) {
-                record.absences.forEach((absenceType, periodIndex) => {
+                record.absences.forEach((absenceType, periodIndex) => { // periodIndex is 0-based
                     if (VALID_ABSENCE_TYPES.includes(absenceType)) {
-                        const courseName = currentTimetable[dayOfWeek][periodIndex + 1];
+                        const courseName = currentTimetable[dayOfWeek][periodIndex + 1]; // Timetable periods are 1-based
                         if (courseName && courseName.trim() !== "") {
                             absenceCountsByCourse[courseName] = (absenceCountsByCourse[courseName] || 0) + 1;
                             coursesWithAbsences.add(courseName);
@@ -181,8 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // resultsTableBodyEl.innerHTML = ''; // 移除
-        resultsCardsContainerEl.innerHTML = ''; // 新增
+        resultsCardsContainerEl.innerHTML = ''; 
 
         const coursesToDisplay = new Set();
         Object.keys(totalSessionsByCourse).forEach(course => {
@@ -192,8 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (coursesToDisplay.size === 0) {
              resultsEl.style.display = 'block';
-             // resultsTableBodyEl.innerHTML = '<tr><td colspan="6">課表中未定義任何有效課程，或無有效缺曠資料。</td></tr>'; // 移除
-             resultsCardsContainerEl.innerHTML = '<p class="no-results">課表中未定義任何有效課程，或無有效缺曠資料。</p>'; // 新增
+             resultsCardsContainerEl.innerHTML = '<p class="no-results">課表中未定義任何有效課程，或無有效缺曠資料。請檢查課表與缺曠記錄。</p>';
              return;
         }
 
@@ -204,9 +271,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const absentCount = absenceCountsByCourse[courseName] || 0;
 
             let oneThirdThreshold = 0;
-            let sessionsToReachThreshold = 0; // Initialize as number
+            let sessionsToReachThreshold = 0; 
             let statusText = "";
-            let statusClass = ""; // For styling the badge and card
+            let statusClass = ""; 
             let summaryText = "";
             
             const sessionsThisCoursePerWeek = weeklySessionsByCourse[courseName] || 0;
@@ -223,26 +290,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isOverOrAtOneThird = absentCount >= oneThirdThreshold;
                 
                 if (isOverOrAtOneThird) {
-                    statusText = "已超過";
+                    statusText = "扣考"; 
                     statusClass = "exceeded";
                     if (absentCount === oneThirdThreshold) {
                         summaryText = `已達 1/3 上限。`;
-                    } else {
-                        summaryText = `已超過 1/3 上限 ${absentCount - oneThirdThreshold} 次缺席。`; 
-                        // User had +1 here, let's verify. If threshold is 10, absent 11, 11-10=1. "已超過1次" seems correct.
-                        // Original user code in a previous turn: summaryText = `已超過 1/3 上限 ${absentCount - oneThirdThreshold +1} 次缺席。`;
-                        // Let's use the user's latest accepted version:
-                        // From user change: summaryText = `已超過 1/3 上限。 ${absentCount - oneThirdThreshold +1} 次缺席。`;
-                        // The logic `absentCount - oneThirdThreshold` seems more direct for "times over".
-                        // If threshold = 10, absent = 11, then 11-10 = 1. "Exceeded by 1".
-                        // If `absentCount - oneThirdThreshold + 1` means `(11-10)+1 = 2`. This seems like "2nd session into exceeded state"
-                        // Let's stick to the user's latest summaryText from the diff:
-                        summaryText = `已超過 1/3 上限。超過 ${absentCount - oneThirdThreshold + 1} 次缺席。`;
-                         if (absentCount === oneThirdThreshold) { // This condition will be met by the parent if, so it might make the above complex.
-                             summaryText = `已達 1/3 上限。`;
-                         }
-
-
+                    } else { // absentCount > oneThirdThreshold
+                        const extraAbsences = absentCount - oneThirdThreshold;
+                        summaryText = `已超過總節數的1/3，並已額外缺席 ${extraAbsences} 節課。`;
                     }
                 } else if (sessionsThisCoursePerWeek > 0 && sessionsToReachThreshold > 0 && sessionsToReachThreshold <= sessionsThisCoursePerWeek) {
                     statusText = "警告";
@@ -253,8 +307,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     statusClass = "safe";
                     summaryText = `在達到 1/3 上限之前，您還可以缺席 ${sessionsToReachThreshold} 次。`;
                 }
-            } else {
-                return; 
+            } else { // totalSessions is 0 and absentCount is 0
+                // Don't display courses that are not in the timetable and have no absences.
+                // This case might occur if a courseName was in weeklySessionsByCourse (e.g. from an empty slot in markdown)
+                // but calculateTotalCourseSessions resulted in 0 total sessions over the semester.
+                // Only display if totalSessionsByCourse had it, or if it had absences.
+                // The `coursesToDisplay` logic should already handle this.
+                // If we reach here, it means it was in `coursesToDisplay` but somehow `totalSessions` is still 0.
+                // This implies it might be an empty course in the timetable but without absences.
+                // We can explicitly skip it or let the card be minimal. Let's skip.
+                if (absentCount === 0) return; // Explicitly skip if no absences and no total sessions.
+
+                // Fallback for safety, though coursesToDisplay should prevent this mostly
+                statusText = "未知";
+                statusClass = "error"; // Or a new 'unknown' class
+                summaryText = "課程資料不完整或未在課表。";
+                oneThirdThreshold = 0;
+                sessionsToReachThreshold = 0;
+
             }
 
             const card = document.createElement('div');
@@ -278,6 +348,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'error':
                     badgeBackgroundColor = '#fd7e14'; // Orange
                     break;
+                default: // For "未知" or other unhandled statusClass
+                    badgeBackgroundColor = '#6c757d'; // Grey
+                    break;
             }
 
             card.innerHTML = `
@@ -298,21 +371,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         resultsEl.style.display = 'block';
         if (resultsCardsContainerEl.innerHTML === '') {
-             // resultsTableBodyEl.innerHTML = '<tr><td colspan="6">沒有可顯示的課程資料。請確認課表包含有效課程且有對應的缺曠記錄。</td></tr>'; // 移除
-             resultsCardsContainerEl.innerHTML = '<p class="no-results">沒有可顯示的課程資料。請確認課表包含有效課程且有對應的缺曠記錄。</p>'; // 新增
+             resultsCardsContainerEl.innerHTML = '<p class="no-results">沒有可顯示的課程資料。請確認課表包含有效課程且有對應的缺曠記錄。</p>';
         }
     });
 
-    populateTimetableEditor(initialTimetable);
+    // 舊的 populateTimetableEditor 呼叫，現在不需要了
+    // populateTimetableEditor(initialTimetable); 
 
-    if (totalWeeksInputEl && displayTotalWeeksEl) {
+    // 舊的 totalWeeksInputEl input 事件監聽器，如果 displayTotalWeeksEl 已被移除，則不需要
+    /*
+    if (totalWeeksInputEl && displayTotalWeeksEl) { // displayTotalWeeksEl might be null
         totalWeeksInputEl.addEventListener('input', () => {
             const newTotalWeeks = parseInt(totalWeeksInputEl.value, 10);
-            if (!isNaN(newTotalWeeks) && newTotalWeeks > 0) {
-                displayTotalWeeksEl.textContent = newTotalWeeks;
-            } else {
-                displayTotalWeeksEl.textContent = "-"; // 或者一個預設的無效提示
+            if (displayTotalWeeksEl) { // Check again before using
+                if (!isNaN(newTotalWeeks) && newTotalWeeks > 0) {
+                    displayTotalWeeksEl.textContent = newTotalWeeks;
+                } else {
+                    displayTotalWeeksEl.textContent = "-"; 
+                }
             }
         });
     }
+    */
 }); 

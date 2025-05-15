@@ -66,43 +66,85 @@ button#calculateButton:hover {
     background-color: #0056b3;
 }
 
-#timetableEditor {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Wider columns */
-    gap: 20px; /* Increased gap */
+/* Styles for new Markdown Timetable Input */
+.timetable-input-container {
+    display: flex;
+    align-items: flex-start; /* Align button to the top of textarea */
+    gap: 10px;
     margin-bottom: 15px;
 }
 
-.day-column {
+#markdownTimetable {
+    flex-grow: 1; /* Textarea takes up available space */
+    min-height: 250px; /* Default height for markdown editor */
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    font-size: 0.95em;
+    line-height: 1.5;
     border: 1px solid #ccc;
-    padding: 15px; /* Increased padding */
-    border-radius: 5px;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+#clearTimetableButton {
+    padding: 8px 15px;
+    background-color: #6c757d; /* Grey color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    height: fit-content; /* Adjust height to content */
+    white-space: nowrap; /* Ensure text stays on one line */
+}
+
+#clearTimetableButton:hover {
+    background-color: #5a6268;
+}
+
+.timetable-example {
     background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 15px;
+    font-size: 0.9em;
+    margin-bottom: 15px; /* Added space below the example box */
 }
 
-.day-column h3 {
+.timetable-example h4 {
     margin-top: 0;
+    margin-bottom: 10px;
     font-size: 1.1em;
-    color: #0056b3;
-    border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 8px;
-    margin-bottom: 12px;
+    color: #333;
 }
 
-.day-column label {
-    display: block;
-    margin-bottom: 4px; /* Increased margin */
-    font-size: 0.9em;
-    font-weight: 500;
+.timetable-example h4 .icon {
+    margin-right: 5px;
 }
 
-.day-column input[type="text"] {
-    width: calc(100% - 12px); /* Adjusted for padding */
-    padding: 6px;
-    margin-bottom: 10px; /* Increased margin */
+.timetable-example pre {
+    background-color: #fff;
     border: 1px solid #ddd;
-    border-radius: 3px;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto; /* Allow horizontal scrolling for long lines */
+    white-space: pre-wrap; /* Wrap lines but preserve formatting */
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
     font-size: 0.9em;
+}
+
+.timetable-example code {
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+}
+
+.timetable-example ul {
+    padding-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+
+.timetable-example ul li {
+    margin-bottom: 5px;
+    color: #555;
 }
 
 /* New Card Styles */

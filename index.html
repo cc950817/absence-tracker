@@ -21,10 +21,24 @@
         </div>
 
         <div class="input-section">
-            <h2>步驟二：確認或編輯課表 (每週上課節數)</h2>
-            <p>系統將根據此課表計算各科目每週上課節數。您可以直接修改以下欄位中的課程名稱。</p>
-            <div id="timetableEditor">
-                <!-- JavaScript 會動態產生課表編輯區域 -->
+            <h2>步驟二：輸入課表 (Markdown 格式)</h2>
+            <div class="timetable-example">
+                <h4><span class="icon">📝</span>範例格式：</h4>
+                <pre><code>### **星期一**
+
+- 第1節：課程名稱A
+- 第2節：課程名稱B
+
+### **星期二**
+
+- 第1節：課程名稱C
+- 第2節：課程名稱D
+
+...每日最多7節</code></pre>
+            </div>
+            <div class="timetable-input-container">
+                <textarea id="markdownTimetable" rows="20" placeholder="請在此貼上您的課表，並遵循範例格式..."></textarea>
+                <button id="clearTimetableButton" title="清除課表內容">清除</button>
             </div>
         </div>
 
