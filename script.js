@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const absenceDataEl = document.getElementById('absenceData');
     const calculateButtonEl = document.getElementById('calculateButton');
     const resultsEl = document.getElementById('results');
-    const resultsTableBodyEl = document.querySelector('#resultsTable tbody');
+    const resultsCardsContainerEl = document.getElementById('resultsCardsContainer');
     const timetableEditorEl = document.getElementById('timetableEditor');
     const totalWeeksInputEl = document.getElementById('totalWeeks');
     const displayTotalWeeksEl = document.getElementById('displayTotalWeeks');
@@ -146,7 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         if (displayTotalWeeksEl) {
-            displayTotalWeeksEl.textContent = totalWeeks;
+            // This element is gone from index.html, but we might re-add it or similar later.
+            // For now, let's check if it exists before trying to set its textContent.
+             // displayTotalWeeksEl.textContent = totalWeeks;
         }
 
         const totalSessionsByCourse = calculateTotalCourseSessions(currentTimetable, totalWeeks);
@@ -169,8 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        resultsTableBodyEl.innerHTML = '';
-        
+        // resultsTableBodyEl.innerHTML = ''; // 移除
+        resultsCardsContainerEl.innerHTML = ''; // 新增
+
         const coursesToDisplay = new Set();
         Object.keys(totalSessionsByCourse).forEach(course => {
             if(totalSessionsByCourse[course] > 0) coursesToDisplay.add(course);
@@ -179,7 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (coursesToDisplay.size === 0) {
              resultsEl.style.display = 'block';
-             resultsTableBodyEl.innerHTML = '<tr><td colspan="6">課表中未定義任何有效課程，或無有效缺曠資料。</td></tr>';
+             // resultsTableBodyEl.innerHTML = '<tr><td colspan="6">課表中未定義任何有效課程，或無有效缺曠資料。</td></tr>'; // 移除
+             resultsCardsContainerEl.innerHTML = '<p class="no-results">課表中未定義任何有效課程，或無有效缺曠資料。</p>'; // 新增
              return;
         }
 
@@ -190,42 +194,66 @@ document.addEventListener('DOMContentLoaded', () => {
             const absentCount = absenceCountsByCourse[courseName] || 0;
 
             let oneThirdThreshold = 0;
-            let sessionsToReachThreshold = "N/A";
+            let sessionsToReachThreshold = 0; // Initialize as number
             let statusText = "";
-            let rowClass = "";
+            let statusClass = ""; // For styling the badge and card
+            let summaryText = "";
 
             if (totalSessions > 0) {
                 oneThirdThreshold = Math.ceil(totalSessions / 3);
-                sessionsToReachThreshold = Math.max(0, oneThirdThreshold - absentCount);
+                sessionsToReachThreshold = oneThirdThreshold - absentCount;
                 const isOverOrAtOneThird = absentCount >= oneThirdThreshold;
-                statusText = isOverOrAtOneThird ? `是 (已達 ${absentCount}/${oneThirdThreshold})` : "否";
+                
                 if (isOverOrAtOneThird) {
-                    rowClass = 'warning';
+                    statusText = "超標";
+                    statusClass = "exceeded";
+                    summaryText = `已超過 1/3 上限。 ${absentCount - oneThirdThreshold +1} 次缺席。`;
+                     if (absentCount === oneThirdThreshold) {
+                        summaryText = `已達 1/3 上限。`;
+                    }
+                } else {
+                    statusText = "安全";
+                    statusClass = "safe";
+                    summaryText = `在達到 1/3 上限之前，您還可以缺席 ${sessionsToReachThreshold} 次。`;
                 }
-            } else if (absentCount > 0) { // Course has absences but not in timetable or 0 total sessions
-                statusText = "錯誤：課程總節數為0或未在課表";
-                rowClass = 'warning';
-                oneThirdThreshold = "N/A";
+            } else if (absentCount > 0) { 
+                statusText = "錯誤";
+                statusClass = "error"; // Or use 'exceeded' for similar visual
+                summaryText = "課程總節數為0或未在課表，但有缺曠紀錄。";
+                sessionsToReachThreshold = -absentCount; // to show negative
+                oneThirdThreshold = 0; // Explicitly set for display
             } else {
-                // Course has 0 total sessions and 0 absences (e.g. an empty slot in timetable editor)
-                // These are typically not shown unless they were explicitly in totalSessionsByCourse with 0 sessions.
-                // The current logic for `coursesToDisplay` should generally filter these out unless they had absences.
-                return; // Skip row for courses with 0 total and 0 absent if they weren't explicitly tracked
+                return; 
             }
 
-            const row = resultsTableBodyEl.insertRow();
-            if(rowClass) row.classList.add(rowClass);
-            row.insertCell().textContent = courseName;
-            row.insertCell().textContent = totalSessions;
-            row.insertCell().textContent = absentCount;
-            row.insertCell().textContent = totalSessions > 0 ? oneThirdThreshold : "N/A";
-            row.insertCell().textContent = sessionsToReachThreshold;
-            row.insertCell().textContent = statusText;
+            const card = document.createElement('div');
+            card.classList.add('result-card', statusClass);
+            
+            let remainingAbsencesClass = '';
+            if (sessionsToReachThreshold < 0) remainingAbsencesClass = 'negative';
+            else if (sessionsToReachThreshold > 0 && statusClass === 'safe') remainingAbsencesClass = 'positive';
+
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <h3 class="course-name">${courseName}</h3>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
+                <p class="summary-text">${summaryText}</p>
+                <div class="details">
+                    <div class="detail-item"><span class="label">總節數：</span><span class="value">${totalSessions}</span></div>
+                    <div class="detail-item"><span class="label">已計算缺席 (事/曠)：</span><span class="value">${absentCount}</span></div>
+                    <div class="detail-item"><span class="label">最多允許缺席 (1/3)：</span><span class="value">${oneThirdThreshold > 0 ? oneThirdThreshold : 'N/A'}</span></div>
+                    <div class="detail-item"><span class="label">剩餘可缺席次數：</span><span class="value ${remainingAbsencesClass}">${sessionsToReachThreshold}</span></div>
+                </div>
+            `;
+            resultsCardsContainerEl.appendChild(card);
         });
 
         resultsEl.style.display = 'block';
-        if (resultsTableBodyEl.innerHTML === '') {
-            resultsTableBodyEl.innerHTML = '<tr><td colspan="6">沒有可顯示的課程資料。請確認課表包含有效課程且有對應的缺曠記錄。</td></tr>';
+        if (resultsCardsContainerEl.innerHTML === '') {
+             // resultsTableBodyEl.innerHTML = '<tr><td colspan="6">沒有可顯示的課程資料。請確認課表包含有效課程且有對應的缺曠記錄。</td></tr>'; // 移除
+             resultsCardsContainerEl.innerHTML = '<p class="no-results">沒有可顯示的課程資料。請確認課表包含有效課程且有對應的缺曠記錄。</p>'; // 新增
         }
     });
 

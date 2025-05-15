@@ -66,36 +66,6 @@ button#calculateButton:hover {
     background-color: #0056b3;
 }
 
-#resultsTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-#resultsTable th, #resultsTable td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
-}
-
-#resultsTable th {
-    background-color: #f0f0f0;
-    font-weight: bold;
-}
-
-#resultsTable tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-#resultsTable tbody tr.warning {
-    background-color: #ffeeba; /* Highlight warning rows */
-}
-
-#resultsTable tbody tr.warning td:nth-child(6) { /* Target the status cell in warning rows */
-    color: red;
-    font-weight: bold;
-}
-
 #timetableEditor {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Wider columns */
@@ -133,4 +103,106 @@ button#calculateButton:hover {
     border: 1px solid #ddd;
     border-radius: 3px;
     font-size: 0.9em;
+}
+
+/* New Card Styles */
+#resultsCardsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.result-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.result-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.result-card .course-name {
+    font-size: 1.8em; /* Larger font for course name */
+    font-weight: bold;
+    color: #007bff; /* Blue color for course name */
+    margin: 0;
+}
+
+.result-card .status-badge {
+    padding: 5px 10px;      /* Adjusted padding */
+    border-radius: 6px;       /* Adjusted border-radius */
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #fff;
+    white-space: nowrap;    /* Added to keep text horizontal */
+}
+
+.result-card .status-badge.safe {
+    background-color: #28a745; /* Green for safe */
+}
+
+.result-card .status-badge.exceeded {
+    background-color: #dc3545; /* Red for exceeded */
+}
+.result-card .status-badge.error {
+    background-color: #ffc107; /* Yellow for error/warning */
+}
+
+.result-card .summary-text {
+    font-size: 0.95em;
+    color: #555;
+    margin-bottom: 15px;
+    min-height: 30px; /* Ensure consistent height */
+}
+
+.result-card .details {
+    font-size: 0.9em;
+}
+
+.result-card .detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.result-card .detail-item:last-child {
+    border-bottom: none;
+}
+
+.result-card .detail-item .label {
+    color: #333;
+    font-weight: 500;
+}
+
+.result-card .detail-item .value {
+    color: #333;
+    font-weight: bold;
+}
+
+.result-card .detail-item .value.positive {
+    color: #28a745; /* Green for positive remaining absences */
+}
+
+.result-card .detail-item .value.negative {
+    color: #dc3545; /* Red for negative remaining absences */
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: #777;
+    font-size: 1.1em;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
 } 
